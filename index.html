@@ -88,7 +88,7 @@
       /player\.vimeo\.com\/video\/(\d+)/,
       /vimeo\.com\/(\d+)/
     ];
-    return match_video_from_patterns(url, patterns);
+    return match_video_from_patterns(url, "http://www.vimeo.com/", patterns);
   }
 
   function match_youtube_video(url){
@@ -97,16 +97,16 @@
       /v=([^&#\?"\\]+)/,
       /youtu\.be\/([^&#\?"\\])/
     ];
-    return match_video_from_patterns(url, patterns);
+    return match_video_from_patterns(url, "http://www.youtube.com/", patterns);
   }
 
-  function match_video_from_patterns(url, patterns){
+  function match_video_from_patterns(url, base_url, patterns){
     var id = false;
     for(i = 0; regex = patterns[i]; i++){
       var matches = url.match(regex);
       if(!id && matches != null && matches.length > 0){
         id = matches[1];
-        url = "http://vimeo.com/" + id;
+        url = base_url + id;
       }
       debug("url="+url);
     }
