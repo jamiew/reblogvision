@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Videos</title>
+
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js"></script>
+  <script type="text/javascript" src="http://vhx.tv/javascripts/jquery.swfobject-1.1.1.js"></script>
+
+  <style type="text/css" media="screen">
+    html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
+  </style>
+
+</head>
+<body>
+<script type='text/javascript'>
+  function debug(){
+    try {
+      console.log(arguments);
+    } catch(e){}
+  }
+
+  $(document).ready(function(){
+    $('#player').flash({
+      swf: 'http://vhx.tv/embed/megaplaya',
+      width: '100%',
+      height: '100%',
+      allowFullScreen: true,
+      allowScriptAccess: "always"
+    });
+  });
+
+  // Megaplaya calls this function when it's ready
+  var megaplaya = false;
+  function megaplaya_loaded(){
+    megaplaya = $('#player').children()[0];
+    load_videos();
+  }
+
+  function load_videos(){
+    $.ajax({
+      type: "GET",
+      // url: "http://vimeo.com/api/v2/vhx/videos.json",
+      url: "http://api.tumblr.com/v2/blog/jamiew.tumblr.com/posts/video?api_key=PyezS3Q4Smivb24d9SzZGYSuhMNPQUhMsVetMC9ksuGPkK1BTt&jsonp=load_videos_callback",
+      dataType: "jsonp",
+      // success: function(videos, status, ajax) {
+      //   debug(status);
+      //   debug(videos);
+      // }
+     });
+  }
+  var tumblr = false;
+  function load_videos_callback(data){
+    tumblr = data; // REMOVEME
+    debug(data);
+
+    vimeo_regexes = [
+      /player\.vimeo\.com\/video\/(\d+)/,
+      /vimeo\.com\/(\d+)/
+    ];
+
+    youtube_regexes = [];
+
+    var videos = $.map(tumblr.response.posts, function(item){
+      var raw_url = item.player[0].embed_code.match(/src=\"([^\"]+)/)[1];
+      debug(raw_url);
+      var url = raw_url;
+      var id = false;
+
+      // Look for a Vimeo URL
+      for(i = 0; regex = vimeo_regexes[i]; i++){
+        var matches = url.match(regex);
+        if(!id && matches != null && matches.length > 0){
+          id = matches[1];
+          url = "http://vimeo.com/" + id;
+        }
+        debug("url="+url);
+      }
+
+      // Look for a YouTube vid
+      // TODO
+
+      return {raw_url: raw_url, url: url}
+    });
+
+    if (videos) {
+      megaplaya.api_playQueue(videos);
+    }
+  }
+</script>
+
+<div id="player"></div>
+
+</body>
+</html>
