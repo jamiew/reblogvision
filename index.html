@@ -53,32 +53,28 @@
     tumblr = data; // REMOVEME
     debug(data);
 
-    vimeo_regexes = [
-      /player\.vimeo\.com\/video\/(\d+)/,
-      /vimeo\.com\/(\d+)/
-    ];
-
     youtube_regexes = [];
 
     var videos = $.map(tumblr.response.posts, function(item){
       var raw_url = item.player[0].embed_code.match(/src=\"([^\"]+)/)[1];
-      debug(raw_url);
-      var url = raw_url;
-      var id = false;
-
-      // Look for a Vimeo URL
-      for(i = 0; regex = vimeo_regexes[i]; i++){
-        var matches = url.match(regex);
-        if(!id && matches != null && matches.length > 0){
-          id = matches[1];
-          url = "http://vimeo.com/" + id;
-        }
-        debug("url="+url);
+      vimeo_url = match_vimeo_video(raw_url);
+      youtube_url = match_youtube_video(raw_url);
+      if(vimeo_url && youtube_url) {
+        debug("Wow! Matched both! Big fail! "+vimeo_url+" "+youtube_url);
+        url = vimeo_url;
       }
-
-      // Look for a YouTube vid
-      // TODO
-
+      else if(vimeo_url){
+        debug("Matched Vimeo: "+vimeo_url);
+        url = vimeo_url;
+      }
+      else if(youtube_url){
+        debug("Match YouTube: "+youtube_url);
+        url = youtube_url;
+      }
+      else {
+        debug("No match for "+raw_url);
+        url = undefined;
+      }
       return {raw_url: raw_url, url: url}
     });
 
@@ -86,6 +82,36 @@
       megaplaya.api_playQueue(videos);
     }
   }
+
+  function match_vimeo_video(url){
+    patterns = [
+      /player\.vimeo\.com\/video\/(\d+)/,
+      /vimeo\.com\/(\d+)/
+    ];
+    return match_video_from_patterns(url, patterns);
+  }
+
+  function match_youtube_video(url){
+    patterns = [
+      /v\/([^&#\?"\\]+)/,
+      /v=([^&#\?"\\]+)/,
+      /youtu\.be\/([^&#\?"\\])/
+    ];
+    return match_video_from_patterns(url, patterns);
+  }
+
+  function match_video_from_patterns(url, patterns){
+    var id = false;
+    for(i = 0; regex = patterns[i]; i++){
+      var matches = url.match(regex);
+      if(!id && matches != null && matches.length > 0){
+        id = matches[1];
+        url = "http://vimeo.com/" + id;
+      }
+      debug("url="+url);
+    }
+  }
+
 </script>
 
 <div id="player"></div>
