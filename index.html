@@ -88,7 +88,7 @@
       /player\.vimeo\.com\/video\/(\d+)/,
       /vimeo\.com\/(\d+)/
     ];
-    return match_video_from_patterns(url, "http://www.vimeo.com/", patterns);
+    return match_video_from_patterns(url, "http://vimeo.com/", patterns);
   }
 
   function match_youtube_video(url){
@@ -97,7 +97,7 @@
       /v=([^&#\?"\\]+)/,
       /youtu\.be\/([^&#\?"\\])/
     ];
-    return match_video_from_patterns(url, "http://www.youtube.com/", patterns);
+    return match_video_from_patterns(url, "http://www.youtube.com/watch?v=", patterns);
   }
 
   function match_video_from_patterns(url, base_url, patterns){
@@ -108,8 +108,9 @@
         id = matches[1];
         url = base_url + id;
       }
-      debug("url="+url);
+      // debug("url="+url);
     }
+    return url;
   }
 
 </script>
