@@ -8,6 +8,19 @@
 
   <style type="text/css" media="screen">
     html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
+    body { background-color: #000; color: #fff; font-family: sans-serif; font-size: 96%; }
+    a { color: #fff; font-weight: bold; text-decoration: none; }
+    a:hover { color: #f93f4a; }
+
+    #blog { position: absolute; z-index: 100; height: 150px; opacity: 0.9; width: 100%; top: 0; left: 0; padding: 20px 0 10px 20px; }
+    #blog .title, #blog .url { display: inline; }
+    #blog .title a { font-size: 14pt; text-decoration: underline; font-weight: bold; }
+    #blog .url a { color: #555; display: inline; margin-left: 20px; }
+    #blog .description { font-size: 9pt; color: #acacac; text-align: left; width: 400px; padding-top: 20px; padding-left: 20px; clear: left; }
+
+    #about { position: absolute; z-index: 100; opacity: 0.9; width: 100%; top: 30%; text-align: center; background-color: #fff; padding: 40px 0; }
+    #about .title a { font-family: "Impact"; letter-spacing: 8px; font-size: 10em; color: #E74BA8; }
+
   </style>
 
 </head>
@@ -27,6 +40,11 @@
       allowFullScreen: true,
       allowScriptAccess: "always"
     });
+
+    // $('#description').hide();
+    // $('#title').hide().fadeIn(2000, function(){
+    //   $('#description').fadeIn('slow');
+    // });
   });
 
   // Megaplaya calls this function when it's ready
@@ -39,28 +57,32 @@
   function load_videos(){
     $.ajax({
       type: "GET",
-      // url: "http://vimeo.com/api/v2/vhx/videos.json",
       url: "http://api.tumblr.com/v2/blog/jamiew.tumblr.com/posts/video?api_key=PyezS3Q4Smivb24d9SzZGYSuhMNPQUhMsVetMC9ksuGPkK1BTt&jsonp=load_videos_callback",
-      dataType: "jsonp",
-      // success: function(videos, status, ajax) {
-      //   debug(status);
-      //   debug(videos);
-      // }
-     });
+      dataType: "jsonp"
+    });
   }
-  var tumblr = false;
+
+  var tumblr = false; // REMOVEME
   function load_videos_callback(data){
     tumblr = data; // REMOVEME
     debug(data);
 
-    youtube_regexes = [];
+    // Set blog info
+    var blog = data.response.blog;
+    $('#blog').hide();
+    $('#blog .title').html('<a target="_blank" href="'+blog.url+'">'+blog.title+'</a>');
+    $('#blog .url').html('<a target="_blank" href="'+blog.url+'">'+blog.url.replace('http://','').replace(/\/$/,'')+'</a>');
+    $('#blog .description').html(blog.description);
+    // Tumblr API doesn't have avatar :-(
+    $('#blog').fadeIn('slow');
 
+    // Process and load videos
     var videos = $.map(tumblr.response.posts, function(item){
       var raw_url = item.player[0].embed_code.match(/src=\"([^\"]+)/)[1];
       vimeo_url = match_vimeo_video(raw_url);
       youtube_url = match_youtube_video(raw_url);
       if(vimeo_url && youtube_url) {
-        debug("Wow! Matched both! Big fail! "+vimeo_url+" "+youtube_url);
+        debug("Matched both Vimeo & YouTube, using Vimeo: "+vimeo_url);
         url = vimeo_url;
       }
       else if(vimeo_url){
@@ -80,6 +102,8 @@
 
     if (videos) {
       megaplaya.api_playQueue(videos);
+      $('#about').delay(1000).fadeOut(500);
+      $('#blog').delay(7000).slideUp('fast');
     }
   }
 
@@ -114,6 +138,16 @@
   }
 
 </script>
+
+<div id="about">
+  <div class="title"><a href="/">REBLOGVISION</a></div>
+</div>
+
+<div id="blog">
+  <div class="title"></div>
+  <div class="url"></div>
+  <div class="description"></div>
+</div>
 
 <div id="player"></div>
 
