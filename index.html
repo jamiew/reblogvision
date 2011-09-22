@@ -27,11 +27,17 @@
 <body>
 <script type='text/javascript'>
   function debug(){
-    try {
-      console.log(arguments);
-    } catch(e){}
+    try { console.log(arguments); } catch(e){}
   }
 
+  // Set blog name if passed like http://reblogvision.com/#jamiew.tumblr.com
+  var blogname = "jamiew.tumblr.com";
+  if(window.location.hash){
+    blogname = window.location.hash.replace(/^\#/,'');
+    debug("Set blogname to "+blogname);
+  }
+
+  // Load VHX player
   $(document).ready(function(){
     $('#player').flash({
       swf: 'http://vhx.tv/embed/megaplaya',
@@ -40,11 +46,6 @@
       allowFullScreen: true,
       allowScriptAccess: "always"
     });
-
-    // $('#description').hide();
-    // $('#title').hide().fadeIn(2000, function(){
-    //   $('#description').fadeIn('slow');
-    // });
   });
 
   // Megaplaya calls this function when it's ready
@@ -57,7 +58,7 @@
   function load_videos(){
     $.ajax({
       type: "GET",
-      url: "http://api.tumblr.com/v2/blog/jamiew.tumblr.com/posts/video?api_key=PyezS3Q4Smivb24d9SzZGYSuhMNPQUhMsVetMC9ksuGPkK1BTt&jsonp=load_videos_callback",
+      url: "http://api.tumblr.com/v2/blog/"+blogname+"/posts/video?api_key=PyezS3Q4Smivb24d9SzZGYSuhMNPQUhMsVetMC9ksuGPkK1BTt&jsonp=load_videos_callback",
       dataType: "jsonp"
     });
   }
